@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Lista de Estabelecimentos </title>
+    <style> body { font-family: sans-serif; } </style>
+</head>
+<body>
+    <h1>Estabelecimentos Cadastrados</h1>
+    <ul>
+        {% for estabelecimento in lista_de_estabelecimentos %}
+        <li><p>Nome: {{ estabelecimento.nome }}<p>
+            <p>Estado: {{ estabelecimento.estado }}</p>
+            <p>Cidade: {{ estabelecimento.cidade }}</p>
+            <p>Bairro: {{ estabelecimento.bairro }}</p>
+            <p>Rua: {{ estabelecimento.rua }}</p>
+            <p>Numero: {{ estabelecimento.numero }}</p>
+            <p>Reputação: {{ estabelecimento.reputacao }}</p>
+            <p>Situação: {{ estabelecimento.situacao }}</p>
+            <p>Descrição: {{ estabelecimento.descricao }}</p></li>
+        {% else %}
+        <li>Nenhum estabelecimento encontrado.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

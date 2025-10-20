@@ -1,49 +1,11 @@
 from setup.loaders.database import db
-from sqlalchemy.orm import Mapped, mapped_column # Mapped aparentemente é um tipo que é usada puramente pra deixar o codigo mais pythonico, e mapped_column é pra relacionar 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 
-
-#from app import app
-
-"""with app.app_context():
-    db.reflect(bind_key= "bares") # reflete os dados do bdd pra mapear pras classes bind key é qual schema do bdd eu quero refletir
-"""
-class UsuarioModel:
-    # Simula um 'banco de dados' em memória e a lógica de negócio.
-    # Em um projeto real, aqui estariam as chamadas ao SQLAlchemy, etc.
-
-    # Dados em memória para simplificar
-
-    _usuarios = [
-    {'id': 1, 'nome': 'Rafael Morales', 'email': 'morales@gmail.com', 'senha': '1234', 'admin': True},
-    {'id': 2, 'nome': 'Rafael Moreira', 'email': 'moreira@gmail.com', 'senha': '12', 'admin': True},
-    {'id': 3, 'nome': 'Julia Calixto', 'email': 'calixto@gmail.com', 'senha': '12', 'admin': True},
-    {'id': 4, 'nome': 'Luis Henrique', 'email': 'luis@gmail.com', 'senha': '12', 'admin': True}
-    ]
-    _next_id = 5
-
-    def get_todos(self):
-        # Retorna todos os usuários
-        return self._usuarios
-    
-    def get_um(self, user_id):
-        # Retorna um único usuário pelo ID.
-        for user in self._usuarios:
-            if user['id'] == user_id:
-                return user
-        return None
-    
-    def salvar(self, nome, email, senha, admin):
-
-        # Salva um novo usuário e retorna ele.
-
-        novo_usuario = {'id': self._next_id, 'nome': nome, 'email': email, 'senha': senha, 'admin': admin}
-        self._usuarios.append(novo_usuario)
-        self._next_id += 1
-        return novo_usuario
-
+DB_PASSPHRASE = "senha-secreta" 
 
 class EstabelecimentoModel(db.Model):
+    __table_args__ = {'extend_existing': True} 
+
     print(db.metadata.tables.keys())
     __table__ = db.metadata.tables["estabelecimento"]
     @classmethod
@@ -59,3 +21,39 @@ class EstabelecimentoModel(db.Model):
         inspector = inspect(db.engine)
         tables = inspector.get_table_names(schema="nome_do_banco")
         print(tables)
+    
+    @classmethod
+    def get_by_id_decrypted(cls, estabelecimento_id: int):
+        
+        sql_command = text("CALL sp_get_estab_by_id(:id_param, :passphrase_param)")
+        
+        params = {
+            "id_param": estabelecimento_id,
+            "passphrase_param": DB_PASSPHRASE 
+        }
+
+        try:
+            # Executa a procedure
+            resultado = db.session.execute(sql_command, params).mappings().one_or_none()
+            db.session.close() 
+            return resultado
+
+        except Exception as e:
+            print(f"ERRO: Falha ao executar a SP sp_get_estab_by_id: {e}")
+            db.session.rollback()
+            return None
+
+    @classmethod
+    def get_all_decrypted(cls):
+        sql_command = text("CALL sp_get_all_estab(:passphrase_param)")
+        params = {"passphrase_param": DB_PASSPHRASE}
+        
+        try:
+            resultados = db.session.execute(sql_command, params).mappings().all()
+            db.session.close()
+            return resultados
+            
+        except Exception as e:
+            print(f"ERRO: Falha ao executar a SP sp_get_all_estab: {e}")
+            db.session.rollback()
+            return []

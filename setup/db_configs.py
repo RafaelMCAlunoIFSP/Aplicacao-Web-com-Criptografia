@@ -9,5 +9,5 @@
  3306 - a porta em que ta sendo acessado
  /bares - esquema do bdd que to acessando )
 """
-DATABASE_URI = "mysql+pymysql://root@localhost:3306/bares" 
+DATABASE_URI = "mysql+pymysql://root:MGpacify9@localhost:3306/bares" 
 TRACK_MODIFICATIONS = False

@@ -1,10 +1,16 @@
+import os
+import sys
+
+project_root = os.path.dirname(os.path.abspath(__file__))
+
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 from flask import Flask
 
-#from controllers.usuario import usuario_bp
-
-from setup.db_configs import * # aqui ta a instancia do bdd criado com o sql alchemy ( por favor ler a docstring do arquivo db.py)
+from setup.db_configs import *
 from setup.loaders.load_models import load_models
-from setup.loaders.database import init_db
+from setup.loaders.database import init_db, db
 from setup.loaders.load_controllers import load_controllers
 
 def create_app():
@@ -15,11 +21,16 @@ def create_app():
     # inicializando em ordem!
     init_db(app)
     load_models("models")
-    
     load_controllers(app,"controllers")
+
+    with app.app_context():
+        db.create_all()
 
     return app
 
 app = create_app()
+
+app.config['SECRET_KEY'] = 'bunda'
+
 if __name__ == '__main__':
     app.run(debug=True)
